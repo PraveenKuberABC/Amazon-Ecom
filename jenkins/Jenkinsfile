@@ -1,0 +1,80 @@
+
+pipeline {
+    agent any
+
+    stages {
+
+        stage('clone project') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/Meenakshiii-bit/Amazon-Ecom.git'
+            }
+        }
+
+        stage('clean') {
+            steps {
+                sh 'mvn clean'
+            }
+        }
+
+        stage('compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+
+        stage('test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                subject: "BUILD SUCCESS: ${env.JOB_NAME}",
+                body: """
+                    Hello,
+
+                    Build completed successfully!
+
+                    Job: ${env.JOB_NAME}
+                    Build Number: ${env.BUILD_NUMBER}
+                    Build URL: ${env.BUILD_URL}
+
+                    Regards,
+                    Jenkins
+                """,
+                to: 'aurora.abc2026@gmail.com'
+            )
+        }
+
+        failure {
+            emailext(
+                subject: "BUILD FAILURE: ${env.JOB_NAME}",
+                body: """
+                    Hello,
+
+                    Build has failed!
+
+                    Job: ${env.JOB_NAME}
+                    Build Number: ${env.BUILD_NUMBER}
+                    Build URL: ${env.BUILD_URL}
+
+                    Please check the Jenkins console output.
+
+                    Regards,
+                    Jenkins
+                """,
+                to: 'aurora.abc2026@gmail.com'
+            )
+        }
+    }
+}
